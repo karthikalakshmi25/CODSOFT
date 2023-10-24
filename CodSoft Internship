@@ -1,0 +1,455 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "mount_file_id": "1f4FEMJ6Lk-A0MlxTmNgW_O0Yvah9CHI4",
+      "authorship_tag": "ABX9TyNEZ8JrKazuqmQTic2rDqgj",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/karthikalakshmi25/CODSOFT/blob/main/CodSoft%20Internship\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "i-IohKcz_Vhi",
+        "outputId": "41e146d9-c0ea-4176-9871-2955dd0c0b37"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount(\"/content/drive\", force_remount=True).\n"
+          ]
+        }
+      ],
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import random\n",
+        "\n",
+        "def print_board(board):\n",
+        "    for row in board:\n",
+        "        print(\" | \".join(row))\n",
+        "        print(\"-\" * 9)\n",
+        "\n",
+        "def check_winner(board, player):\n",
+        "    for row in board:\n",
+        "        if all(cell == player for cell in row):\n",
+        "            return True\n",
+        "    for col in range(3):\n",
+        "        if all(board[row][col] == player for row in range(3)):\n",
+        "            return True\n",
+        "    if all(board[i][i] == player for i in range(3)) or all(board[i][2 - i] == player for i in range(3)):\n",
+        "        return True\n",
+        "    return False\n",
+        "\n",
+        "def minimax(board, depth, maximizing_player):\n",
+        "    if check_winner(board, 'X'):\n",
+        "        return -1\n",
+        "    if check_winner(board, 'O'):\n",
+        "        return 1\n",
+        "    if is_board_full(board):\n",
+        "        return 0\n",
+        "\n",
+        "    if maximizing_player:\n",
+        "        max_eval = -float('inf')\n",
+        "        for row in range(3):\n",
+        "            for col in range(3):\n",
+        "                if board[row][col] == ' ':\n",
+        "                    board[row][col] = 'O'\n",
+        "                    eval = minimax(board, depth + 1, False)\n",
+        "                    board[row][col] = ' '\n",
+        "                    max_eval = max(max_eval, eval)\n",
+        "        return max_eval\n",
+        "    else:\n",
+        "        min_eval = float('inf')\n",
+        "        for row in range(3):\n",
+        "            for col in range(3):\n",
+        "                if board[row][col] == ' ':\n",
+        "                    board[row][col] = 'X'\n",
+        "                    eval = minimax(board, depth + 1, True)\n",
+        "                    board[row][col] = ' '\n",
+        "                    min_eval = min(min_eval, eval)\n",
+        "        return min_eval\n",
+        "\n",
+        "def best_move(board):\n",
+        "    best_val = -float('inf')\n",
+        "    best_move = (-1, -1)\n",
+        "\n",
+        "    for row in range(3):\n",
+        "        for col in range(3):\n",
+        "            if board[row][col] == ' ':\n",
+        "                board[row][col] = 'O'\n",
+        "                move_val = minimax(board, 0, False)\n",
+        "                board[row][col] = ' '\n",
+        "                if move_val > best_val:\n",
+        "                    best_val = move_val\n",
+        "                    best_move = (row, col)\n",
+        "\n",
+        "    return best_move\n",
+        "\n",
+        "def is_board_full(board):\n",
+        "    return all(cell != ' ' for row in board for cell in row)\n",
+        "\n",
+        "def play_tic_tac_toe():\n",
+        "    board = [[' ' for _ in range(3)] for _ in range(3)]\n",
+        "    player = 'X'\n",
+        "\n",
+        "    print(\"Welcome to Tic-Tac-Toe!\")\n",
+        "\n",
+        "    while True:\n",
+        "        print_board(board)\n",
+        "\n",
+        "        if player == 'X':\n",
+        "            row, col = map(int, input(\"Enter your move (row and column, e.g., 1 2): \").split())\n",
+        "            if board[row][col] == ' ':\n",
+        "                board[row][col] = 'X'\n",
+        "            else:\n",
+        "                print(\"Invalid move. Try again.\")\n",
+        "                continue\n",
+        "        else:\n",
+        "            row, col = best_move(board)\n",
+        "            board[row][col] = 'O'\n",
+        "            print(f\"AI plays (row {row}, col {col})\")\n",
+        "\n",
+        "        if check_winner(board, player):\n",
+        "            print_board(board)\n",
+        "            print(f\"{player} wins!\")\n",
+        "            break\n",
+        "        elif is_board_full(board):\n",
+        "            print_board(board)\n",
+        "            print(\"It's a draw!\")\n",
+        "            break\n",
+        "\n",
+        "        player = 'X' if player == 'O' else 'O'\n",
+        "\n",
+        "if __name__ == \"__main__\":\n",
+        "    play_tic_tac_toe()\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hek1Mr_YAC4c",
+        "outputId": "38f9c467-cf56-45d2-e806-571e25f15d7a"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Welcome to Tic-Tac-Toe!\n",
+            "  |   |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "Enter your move (row and column, e.g., 1 2): 0 0\n",
+            "X |   |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "AI plays (row 1, col 1)\n",
+            "X |   |  \n",
+            "---------\n",
+            "  | O |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "Enter your move (row and column, e.g., 1 2): 0 1\n",
+            "X | X |  \n",
+            "---------\n",
+            "  | O |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "AI plays (row 0, col 2)\n",
+            "X | X | O\n",
+            "---------\n",
+            "  | O |  \n",
+            "---------\n",
+            "  |   |  \n",
+            "---------\n",
+            "Enter your move (row and column, e.g., 1 2): 2 0\n",
+            "X | X | O\n",
+            "---------\n",
+            "  | O |  \n",
+            "---------\n",
+            "X |   |  \n",
+            "---------\n",
+            "AI plays (row 1, col 0)\n",
+            "X | X | O\n",
+            "---------\n",
+            "O | O |  \n",
+            "---------\n",
+            "X |   |  \n",
+            "---------\n",
+            "Enter your move (row and column, e.g., 1 2): 2 2\n",
+            "X | X | O\n",
+            "---------\n",
+            "O | O |  \n",
+            "---------\n",
+            "X |   | X\n",
+            "---------\n",
+            "AI plays (row 1, col 2)\n",
+            "X | X | O\n",
+            "---------\n",
+            "O | O | O\n",
+            "---------\n",
+            "X |   | X\n",
+            "---------\n",
+            "O wins!\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "VGvzIGEwDXTW"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "T2cVbnwIDZ6F"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "responses = {\n",
+        "    \"hello\": \"Hello! How can I help you?\",\n",
+        "    \"how are you\": \"I'm just a chatbot, but thanks for asking!\",\n",
+        "    \"bye\": \"Goodbye! Have a great day!!!\",\n",
+        "    \"default\": \"Oops..It's like I'm not sure how to respond to that..\",\n",
+        "}\n",
+        "\n",
+        "def get_response(user_input):\n",
+        "    user_input = user_input.lower()\n",
+        "    if user_input in responses:\n",
+        "        return responses[user_input]\n",
+        "    else:\n",
+        "        return responses[\"default\"]\n",
+        "\n",
+        "while True:\n",
+        "    user_input = input(\"You: \")\n",
+        "    if user_input.lower() == \"exit\":\n",
+        "        print(\"Chatbot: Goodbye!\")\n",
+        "        break\n",
+        "    response = get_response(user_input)\n",
+        "    print(\"Chatbot:\", response)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 493
+        },
+        "id": "TvzfUChZDZkj",
+        "outputId": "2eabf2eb-528a-413a-a026-13dc5b1f57dd"
+      },
+      "execution_count": 14,
+      "outputs": [
+        {
+          "metadata": {
+            "tags": null
+          },
+          "name": "stdout",
+          "output_type": "stream",
+          "text": [
+            "Chatbot: Hello! How can I help you?\n",
+            "Chatbot: I'm just a chatbot, but thanks for asking!\n",
+            "Chatbot: Goodbye! Have a great day!!!\n",
+            "Chatbot: Oops..It's like I'm not sure how to respond to that..\n",
+            "Chatbot: Goodbye! Have a great day!!!\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "KeyboardInterrupt",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-14-3305413b8698>\u001b[0m in \u001b[0;36m<cell line: 15>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     14\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     15\u001b[0m \u001b[0;32mwhile\u001b[0m \u001b[0;32mTrue\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 16\u001b[0;31m     \u001b[0muser_input\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0minput\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"You: \"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     17\u001b[0m     \u001b[0;32mif\u001b[0m \u001b[0muser_input\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mlower\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;34m\"exit\"\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     18\u001b[0m         \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Chatbot: Goodbye!\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/ipykernel/kernelbase.py\u001b[0m in \u001b[0;36mraw_input\u001b[0;34m(self, prompt)\u001b[0m\n\u001b[1;32m    849\u001b[0m                 \u001b[0;34m\"raw_input was called, but this frontend does not support input requests.\"\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    850\u001b[0m             )\n\u001b[0;32m--> 851\u001b[0;31m         return self._input_request(str(prompt),\n\u001b[0m\u001b[1;32m    852\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_parent_ident\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    853\u001b[0m             \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_parent_header\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/ipykernel/kernelbase.py\u001b[0m in \u001b[0;36m_input_request\u001b[0;34m(self, prompt, ident, parent, password)\u001b[0m\n\u001b[1;32m    893\u001b[0m             \u001b[0;32mexcept\u001b[0m \u001b[0mKeyboardInterrupt\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    894\u001b[0m                 \u001b[0;31m# re-raise KeyboardInterrupt, to truncate traceback\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 895\u001b[0;31m                 \u001b[0;32mraise\u001b[0m \u001b[0mKeyboardInterrupt\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Interrupted by user\"\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfrom\u001b[0m \u001b[0;32mNone\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    896\u001b[0m             \u001b[0;32mexcept\u001b[0m \u001b[0mException\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0me\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    897\u001b[0m                 \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mlog\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mwarning\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Invalid Message:\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mexc_info\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;32mTrue\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m: Interrupted by user"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install opencv-python-headless\n",
+        "!pip install opencv-python\n",
+        "!pip install face_recognition\n",
+        "\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "_kAigrdJFtvY",
+        "outputId": "eb272cf8-e74e-474e-da4b-c0d49abeb62c"
+      },
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: opencv-python-headless in /usr/local/lib/python3.10/dist-packages (4.8.1.78)\n",
+            "Requirement already satisfied: numpy>=1.21.2 in /usr/local/lib/python3.10/dist-packages (from opencv-python-headless) (1.23.5)\n",
+            "Requirement already satisfied: opencv-python in /usr/local/lib/python3.10/dist-packages (4.8.0.76)\n",
+            "Requirement already satisfied: numpy>=1.21.2 in /usr/local/lib/python3.10/dist-packages (from opencv-python) (1.23.5)\n",
+            "Requirement already satisfied: face_recognition in /usr/local/lib/python3.10/dist-packages (1.3.0)\n",
+            "Requirement already satisfied: face-recognition-models>=0.3.0 in /usr/local/lib/python3.10/dist-packages (from face_recognition) (0.3.0)\n",
+            "Requirement already satisfied: Click>=6.0 in /usr/local/lib/python3.10/dist-packages (from face_recognition) (8.1.7)\n",
+            "Requirement already satisfied: dlib>=19.7 in /usr/local/lib/python3.10/dist-packages (from face_recognition) (19.24.2)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from face_recognition) (1.23.5)\n",
+            "Requirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from face_recognition) (9.4.0)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 403
+        },
+        "id": "60jgph1tmTWK",
+        "outputId": "066ad110-8c6a-4981-841c-f5af12b0f5fc"
+      },
+      "execution_count": 16,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "RuntimeError",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mRuntimeError\u001b[0m                              Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-16-0e0fa96d4f6a>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0;32mimport\u001b[0m \u001b[0mcv2\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0;32mimport\u001b[0m \u001b[0mface_recognition\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0;32mimport\u001b[0m \u001b[0mos\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0;32mimport\u001b[0m \u001b[0mnumpy\u001b[0m \u001b[0;32mas\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/face_recognition/__init__.py\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      5\u001b[0m \u001b[0m__version__\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m'1.2.3'\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      6\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 7\u001b[0;31m \u001b[0;32mfrom\u001b[0m \u001b[0;34m.\u001b[0m\u001b[0mapi\u001b[0m \u001b[0;32mimport\u001b[0m \u001b[0mload_image_file\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mface_locations\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_face_locations\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mface_landmarks\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mface_encodings\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcompare_faces\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mface_distance\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/face_recognition/api.py\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m     24\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     25\u001b[0m \u001b[0mcnn_face_detection_model\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mface_recognition_models\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcnn_face_detector_model_location\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 26\u001b[0;31m \u001b[0mcnn_face_detector\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mdlib\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcnn_face_detection_model_v1\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcnn_face_detection_model\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     27\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     28\u001b[0m \u001b[0mface_recognition_model\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mface_recognition_models\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mface_recognition_model_location\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mRuntimeError\u001b[0m: Error while calling cudaGetDevice(&the_device_id) in file /tmp/pip-install-q6ocv285/dlib_dda52b6d35924085b21e2e55af5ee7e8/dlib/cuda/gpu_data.cpp:204. code: 35, reason: CUDA driver version is insufficient for CUDA runtime version"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "import torchvision.models as models\n",
+        "import torchvision.transforms as transforms\n",
+        "from torch.nn.utils.rnn import pack_padded_sequence\n",
+        "from torch.autograd import Variable\n",
+        "from PIL import Image\n",
+        "import nltk\n",
+        "from collections import Counter\n",
+        "import pickle\n",
+        "nltk.download('punkt')\n",
+        "nltk.download('stopwords')\n",
+        "class EncoderCNN(nn.Module):\n",
+        "    def __init__(self, embed_size):\n",
+        "        super(EncoderCNN, self).__init__()\n",
+        "        self.resnet = models.resnet50(pretrained=True)\n",
+        "        self.modules = list(self.resnet.children())[:-1]\n",
+        "        self.resnet = nn.Sequential(*self.modules)\n",
+        "        self.linear = nn.Linear(self.resnet.fc.in_features, embed_size)\n",
+        "        self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)\n",
+        "\n",
+        "    def forward(self, images):\n",
+        "        with torch.no_grad():\n",
+        "            features = self.resnet(images)\n",
+        "        features = features.view(features.size(0), -1)\n",
+        "        features = self.bn(self.linear(features))\n",
+        "        return features\n",
+        "\n",
+        "class DecoderRNN(nn.Module):\n",
+        "    def __init__(self, embed_size, hidden_size, vocab_size, num_layers, max_seq_length=20):\n",
+        "        super(DecoderRNN, self).__init__()\n",
+        "        self.embed = nn.Embedding(vocab_size, embed_size)\n",
+        "        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=True)\n",
+        "        self.linear = nn.Linear(hidden_size, vocab_size)\n",
+        "        self.max_seq_length = max_seq_length\n",
+        "\n",
+        "    def forward(self, features, captions, lengths):\n",
+        "        embeddings = self.embed(captions)\n",
+        "        embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)\n",
+        "        packed = pack_padded_sequence(embeddings, lengths, batch_first=True)\n",
+        "        hiddens, _ = self.lstm(packed)\n",
+        "        outputs = self.linear(hiddens[0])\n",
+        "        return outputs\n",
+        "\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "NKmG-eOMogKG",
+        "outputId": "06372216-d3e5-4eec-cf47-013fd759b038"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "[nltk_data] Downloading package punkt to /root/nltk_data...\n",
+            "[nltk_data]   Package punkt is already up-to-date!\n",
+            "[nltk_data] Downloading package stopwords to /root/nltk_data...\n",
+            "[nltk_data]   Package stopwords is already up-to-date!\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
